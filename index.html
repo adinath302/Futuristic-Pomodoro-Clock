@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Futuristic Pomodoro Clock</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #0c0c0c;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+
+  .container {
+    text-align: center;
+    background-color: #1e1e1e;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2);
+    width: 350px;
+  }
+
+  #timer {
+    font-size: 6rem;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #55b0ff;
+  }
+
+  #controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30px;
+  }
+
+  button {
+    font-size: 1.5rem;
+    padding: 15px 30px;
+    margin: 0 10px;
+    background-color: #55b0ff;
+    color: #ffffff;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  button:hover {
+    background-color: #007bff;
+  }
+
+  .fa-pause-circle, .fa-play-circle {
+    font-size: 2.5rem;
+  }
+
+  .input-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  input[type="number"] {
+    width: 100px;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    background-color: #1e1e1e;
+    color: #ffffff;
+    text-align: center;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  label {
+    font-size: 1.2rem;
+    margin-bottom: 5px;
+    display: block;
+    color: #ffffff;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div id="timer">25:00</div>
+  <div class="input-container">
+    <label for="workTime">Work Time (min):</label>
+    <input type="number" id="workTime" min="1" max="60" value="25">
+  </div>
+  <div class="input-container">
+    <label for="breakTime">Break Time (min):</label>
+    <input type="number" id="breakTime" min="1" max="60" value="5">
+  </div>
+  <div id="controls">
+    <button id="startButton"><i class="fas fa-play-circle"></i></button>
+    <button id="resetButton"><i class="fas fa-redo-alt"></i></button>
+  </div>
+</div>
+
+<audio id="alarm" src="alarma_clock.mp3" preload="auto"></audio>
+
+<script>
+  let interval;
+  let minutes = 25;
+  let seconds = 0;
+  let isRunning = false;
+  let isWorkTime = true;
+
+  const timerDisplay = document.getElementById('timer');
+  const startButton = document.getElementById('startButton');
+  const resetButton = document.getElementById('resetButton');
+  const workTimeInput = document.getElementById('workTime');
+  const breakTimeInput = document.getElementById('breakTime');
+  const alarmSound = document.getElementById('alarm');
+
+  function updateTimerDisplay() {
+    timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  function startTimer() {
+    interval = setInterval(() => {
+      if (seconds === 0) {
+        if (minutes === 0) {
+          clearInterval(interval);
+          isRunning = false;
+          if (isWorkTime) {
+            minutes = parseInt(breakTimeInput.value);
+            isWorkTime = false;
+            timerDisplay.style.color = '#ff8c00'; // Change color to orange during break
+          } else {
+            minutes = parseInt(workTimeInput.value);
+            isWorkTime = true;
+            timerDisplay.style.color = '#55b0ff'; // Change color back to blue during work
+          }
+          alarmSound.play(); // Play alarm sound
+          startTimer(); // Start the timer again for the next interval
+        }
+        minutes--;
+        seconds = 59;
+      } else {
+        seconds--;
+      }
+      updateTimerDisplay();
+    }, 1000);
+    isRunning = true;
+  }
+
+  function resetTimer() {
+    clearInterval(interval);
+    minutes = parseInt(workTimeInput.value);
+    seconds = 0;
+    isWorkTime = true;
+    updateTimerDisplay();
+    isRunning = false;
+    timerDisplay.style.color = '#55b0ff'; // Reset color to blue
+  }
+
+  startButton.addEventListener('click', () => {
+    if (!isRunning) {
+      startTimer();
+      startButton.innerHTML = '<i class="fas fa-pause-circle"></i>';
+    } else {
+      clearInterval(interval);
+      isRunning = false;
+      startButton.innerHTML = '<i class="fas fa-play-circle"></i>';
+    }
+  });
+
+  resetButton.addEventListener('click', () => {
+    resetTimer();
+    startButton.innerHTML = '<i class="fas fa-play-circle"></i>';
+  });
+
+  // Update timer display initially
+  updateTimerDisplay();
+</script>
+</body>
+</html>
